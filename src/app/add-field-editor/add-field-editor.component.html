@@ -1,0 +1,12 @@
+<!-- from ngx-boostrap -->
+<input
+  id="#add-field"
+  [(ngModel)]="value"
+  [typeahead]="typeheadFields"
+  typeaheadOptionField="name"
+  (typeaheadOnSelect)="showSelectedField($event)"
+  placeholder="Press space to see all"
+  class="form-control mr-sm-2"
+  typeaheadMinLength="0"
+  [disabled]="typeheadFields.length === 0"
+/>

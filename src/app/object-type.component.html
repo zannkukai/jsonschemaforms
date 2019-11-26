@@ -1,0 +1,68 @@
+<!-- main title -->
+<ng-container *ngIf="isRoot()">
+  <legend>
+    <span [tooltip]="to.description">{{ to.label }}</span>
+  </legend>
+</ng-container>
+
+<!--  validation error message -->
+<div class="alert alert-danger" role="alert" *ngIf="showError && formControl.errors">
+  <formly-validation-message [field]="field"></formly-validation-message>
+</div>
+
+<!-- each object properties -->
+<div *ngFor="let f of field.fieldGroup" class="mb-2">
+  <!-- if the field is repeatable the title is rendered by the corresponding array -->
+  <ng-container *ngIf="
+      !f.hide &&
+      ((!isParrentArray() && f.type === 'object') || f.type === 'array')
+    ">
+    <!-- section header -->
+    <ng-container *ngTemplateOutlet="hasMenu(f) ? menu : title; context: { f: f }">
+    </ng-container>
+  </ng-container>
+
+  <!-- field + trash button-->
+  <div class="d-flex pl-4" [ngClass]="{ 'object-block': f.type === 'object' }">
+    <div class="flex-grow-1">
+      <formly-field [field]="f"></formly-field>
+    </div>
+    <ng-container *ngTemplateOutlet="hideButton; context: { $implicit: f }"></ng-container>
+  </div>
+</div>
+
+<!-- TEMPLATES -->
+<!-- dropdown menu -->
+<ng-template #menu let-f=f>
+  <app-dropdown-label-editor [field]="f" [canAdd]="false">
+    <ng-container *ngIf="f.type === 'object'">
+      <ng-container *ngFor="
+            let fChildren of hiddenFieldGroup(f.fieldGroup);
+            let first = first;
+            let last = last
+          ">
+        <h6 *ngIf="first" class="dropdown-header">Add fields</h6>
+        <button class="dropdown-item" (click)="show(fChildren)" type="button">
+          {{ fChildren.templateOptions.label }}
+        </button>
+        <div *ngIf="last && f.templateOptions.helpURL" class="dropdown-divider"></div>
+      </ng-container>
+    </ng-container>
+
+    <a *ngIf="f.templateOptions.helpURL" class="dropdown-item" [href]="f.templateOptions.helpURL" translate>
+      Help
+    </a>
+  </app-dropdown-label-editor>
+</ng-template>
+
+<!-- section title -->
+<ng-template #title let-f=f>
+  <span [id]="f.id">{{ f.templateOptions.label }}</span>
+</ng-template>
+
+<!-- tash button -->
+<ng-template #hideButton let-f>
+  <button (click)="hide(f)" *ngIf="canHide(f)" class="btn btn-outline-secondary ml-1 btn-sm">
+    <i class="fa fa-trash"></i>
+  </button>
+</ng-template>

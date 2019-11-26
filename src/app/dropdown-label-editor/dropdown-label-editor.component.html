@@ -1,0 +1,34 @@
+<div *ngIf="field.templateOptions.label" class="btn-group d-block" dropdown>
+  <!-- add button -->
+  <a
+    *ngIf="canAdd"
+    (click)="addClick($event)"
+    class="btn btn-outline-secondary mr-1 btn-sm"
+  >
+    <i class="btn btn-link btn-sm"></i>
+</a>
+  <!-- dropdown button with legend -->
+  <button
+    [id]="field.id"
+    dropdownToggle
+    type="button"
+    class="btn btn-link dropdown-toggle text-decoration-none text-reset p-0 dropdown-toggle"
+    aria-controls="dropdown-basic"
+  >
+    <span [tooltip]="field.templateOptions.description">
+      {{ field.templateOptions.label }}
+      <span *ngIf="field.templateOptions.required">*</span>
+    </span>
+    <span class="ml-2 caret"></span>
+  </button>
+  <!-- dropdown list -->
+  <div
+    id="dropdown-basic"
+    *dropdownMenu
+    class="dropdown-menu"
+    role="menu"
+    aria-labelledby="button-basic"
+  >
+    <ng-content></ng-content>
+  </div>
+</div>
