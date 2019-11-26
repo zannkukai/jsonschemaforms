@@ -1,4 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, ɵSWITCH_COMPILE_INJECTABLE__POST_R3__ } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { FormlyJsonschema } from '@ngx-formly/core/json-schema';
+import { JSONSchema7 } from 'json-schema';
+
+function orderedJsonSchema(schema) {
+  if (schema.properties) {
+    if (schema.propertiesOrder) {
+      schema._properties = {...schema.properties};
+      schema.properties = {};
+      for (const property of schema.propertiesOrder) {
+        schema.properties[property] = schema._properties[property];
+      }
+    }
+    for (const property in schema.properties) {
+      orderedJsonSchema(schema.properties[property]);
+    }
+  }
+  if (schema.items) {
+    orderedJsonSchema(schema.items);
+  }
+  return schema;
+}
 
 @Component({
   selector: 'app-root',
@@ -6,5 +29,142 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'schemaforms';
+  form: FormGroup;
+  model: any;
+  options: FormlyFormOptions;
+  fields: FormlyFieldConfig[];
+
+  type: string;
+  schema: any = {
+    type: 'object',
+    required: ['title', 'authors'],
+    propertiesOrder: ['types', 'title', 'authors', 'street', 'address'],
+    properties: {
+      title: {
+        title: 'Title',
+        type: 'string',
+        form: {
+          placeholder: 'please enter a title',
+          focus: true
+        }
+      },
+      street: {
+        title: 'Street',
+        type: 'string',
+        minLength: 3,
+        form: {
+          placeholder: 'please enter a street'
+        }
+      },
+      address: {
+        title: 'Address',
+        type: 'array',
+        items: {
+          type: 'object',
+          propertiesOrder: ['city', 'street'],
+          properties: {
+            'street': { title: 'street', type: 'string' },
+            'city': {
+              type: 'array',
+              title: 'cities',
+              items: {
+                title: 'city',
+                type: 'string'
+              }
+            }
+          }
+        }
+      },
+      private: {
+        title: 'Private',
+        type: 'string',
+        default: 'private',
+        readOnly: true,
+        minLength: 3,
+        form: {
+          placeholder: 'please enter a street'
+        }
+      },
+      hidden: {
+        title: 'Hidden field',
+        type: 'string',
+        form: {
+          hide: true
+        }
+      },
+      authors: {
+        type: 'array',
+        minItems: 1,
+        maxItems: 3,
+        title: 'Authors',
+        items: {
+          title: 'name',
+          type: 'string',
+          minLength: 3
+        }
+      },
+      types: {
+        type: 'string',
+        title: 'Types',
+        default: 'book',
+        enum: [
+          'book',
+          'report'
+        ]
+      }
+    }
+  }
+
+
+  constructor(
+    private formlyJsonschema: FormlyJsonschema
+  ) {
+    // console.log('prop', new Properties(this.schema).properties);
+    this.schema = orderedJsonSchema(this.schema);
+    console.log(this.schema);
+    // this.type = type;
+    this.form = new FormGroup({});
+    this.form.valueChanges.subscribe(x => console.log(x, this.form, this.model));
+    this.options = {};
+    this.fields = [formlyJsonschema.toFieldConfig(this.schema, {
+      map: (field: FormlyFieldConfig, mapSource: JSONSchema7) => {
+        console.log(field, mapSource);
+        const formOptions = mapSource.form;
+        if (formOptions) {
+          if (formOptions.hide === true) {
+            // redefine the field
+            field.hide = true;
+          }
+          if (formOptions.focus === true) {
+            // redefine the field
+            field.focus = true;
+          }
+          if (formOptions.placeholder) {
+            // redefine the field
+            field.templateOptions.placeholder = formOptions.placeholder;
+          }
+        }
+        if (mapSource.type === 'string') {
+          field.wrappers = ['form-field-horizontal'];
+        }
+        // if (mapSource.type === 'array') {
+        //   if (field.validators && field.validators.minItems) {
+        //     field.validators.minItems = ({ value }) => {
+        //       return true;
+        //     };
+        //   }
+        // }
+
+        return field;
+      },
+    })];
+    // console.log(this.fields, this.form);
+    this.model = {
+      // title: 'test'
+    };
+  }
+
+  submit(model) {
+    console.log(model, this.model);
+  }
 }
