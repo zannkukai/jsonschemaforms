@@ -1,0 +1,89 @@
+<!-- array title only if the array is empty -->
+<label *ngIf="to.label && formControl.length === 0">
+  <!-- add button only if the max is not reached -->
+  <button *ngIf="canAdd()" (click)="add(0)" class="btn btn-light bg-white mr-2">
+    <i class="fa fa-plus"></i>
+  </button>
+  <span [tooltip]="to.description">{{ to.label }}</span>
+</label>
+
+<!--  validation error message -->
+<div
+  class="alert alert-danger"
+  role="alert"
+  *ngIf="showError && formControl.errors"
+>
+  <formly-validation-message [field]="field"></formly-validation-message>
+</div>
+
+<!-- for each item -->
+<ng-container *ngFor="let field of field.fieldGroup; let i = index">
+  <!-- put title with menu section for item object -->
+  <div *ngIf="isChildrenObject()">
+    <app-dropdown-label-editor
+      [field]="field"
+      [canAdd]="canAdd()"
+      (addClicked)="add(i + 1)"
+    >
+      <ng-container *ngIf="field.type === 'object'; k">
+        <ng-container
+          *ngFor="
+            let fChildren of field.fieldGroup;
+            let first = first;
+            let last = last
+          "
+        >
+          <h6 *ngIf="first" class="dropdown-header">Add fields</h6>
+          <button
+            *ngIf="fChildren.hide"
+            class="dropdown-item"
+            (click)="fChildren.hide = false"
+            type="button"
+          >
+            {{ fChildren.templateOptions.label }}
+          </button>
+          <div *ngIf="last" class="dropdown-divider"></div>
+        </ng-container>
+      </ng-container>
+      <a class="dropdown-item disabled" href="/cataloging/help">
+        Help
+      </a>
+    </app-dropdown-label-editor>
+
+    <!--  object validation error message -->
+    <div
+      class="alert alert-danger"
+      role="alert"
+      *ngIf="field.options.showError && field.formControl.errors"
+    >
+      <formly-validation-message [field]="field"></formly-validation-message>
+    </div>
+  </div>
+  <!-- all kind of item -->
+  <div
+    class="d-flex mb-2"
+    [ngClass]="{ 'pl-4 object-block': isChildrenObject() }"
+  >
+    <!-- add button -->
+    <button
+      *ngIf="!isChildrenObject() && canAdd()"
+      (click)="add(i + 1)"
+      class="btn btn-light bg-white mr-2"
+    >
+      <i class="fa fa-plus"></i>
+    </button>
+    <!-- item itself -->
+    <div class="flex-grow-1">
+      <formly-field [field]="field"></formly-field>
+    </div>
+    <!-- remove button -->
+    <button
+      (click)="remove(i)"
+      *ngIf="canRemove()"
+      class="btn btn-outline-secondary ml-1"
+      [ngClass]="{ 'mb-2': isChildrenObject() }"
+    >
+      <i class="fa fa-trash"></i>
+    </button>
+  </div>
+</ng-container>

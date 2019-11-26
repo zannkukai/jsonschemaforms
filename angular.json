@@ -28,6 +28,7 @@
               "src/assets"
             ],
             "styles": [
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.scss"
             ],
             "scripts": []
@@ -93,6 +94,7 @@
               "src/assets"
             ],
             "styles": [
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.scss"
             ],
             "scripts": []
@@ -124,6 +126,15 @@
           }
         }
       }
-    }},
-  "defaultProject": "schemaforms"
+    }
+  },
+  "defaultProject": "schemaforms",
+  "cli": {
+    "defaultCollection": "@ngx-formly/schematics"
+  },
+  "schematics": {
+    "@ngx-formly/schematics:component": {
+      "styleext": "scss"
+    }
+  }
 }
