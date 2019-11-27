@@ -1,65 +1,120 @@
-import { Component, OnInit } from '@angular/core';
-import { FieldArrayType, FormlyFieldConfig } from '@ngx-formly/core';
-import { FormArray, FormGroup } from '@angular/forms';
+import { Component, OnInit, AfterViewInit, OnChanges } from "@angular/core";
+import {
+  FieldArrayType,
+  FormlyFieldConfig,
+  FormlyFormOptions
+} from "@ngx-formly/core";
+import { FormArray, FormGroup } from "@angular/forms";
+import { AngularWaitBarrier } from "blocking-proxy/built/lib/angular_wait_barrier";
 
 @Component({
-  selector: 'formly-array-type',
+  selector: "formly-array-type",
   template: `
-  <div class="mb-3">
-  <div class="float-right  text-right">
-  <button [ngClass]="{'disabled': !canAdd()}"
-  class="btn btn-outline-secondary btn-sm" type="button" (click)="add(i)"><i class="fa fa-plus"></i></button>
-</div>
-      <h5 *ngIf="to.label">{{ to.label }} <span *ngIf="field.templateOptions.required">*</span></h5>
-
-    <p *ngIf="to.description">{{ to.description }}</p>
-
-    <div class="alert alert-danger" role="alert" *ngIf="showError && formControl.errors">
+    <div
+      class="alert alert-danger"
+      role="alert"
+      *ngIf="showError && formControl.errors"
+    >
       <formly-validation-message [field]="field"></formly-validation-message>
     </div>
 
-    <div *ngFor="let field of field.fieldGroup;let i = index;" class="row">
-      <div class="text-left col-1">
-      <div class="btn-group" dropdown>
-      <button id="button-basic" dropdownToggle type="button"
-        class="btn btn-link text-decoration-none text-muted p-0" aria-controls="dropdown-basic"
-        aria-haspopup="true" aria-expanded="false">
-        ...
-      </button>
-      <div class="dropdown-menu" *dropdownMenu>
-        <!-- <button class="dropdown-item" (click)="addItem($event)">Add</button> -->
-        <button *ngIf="canAdd()" class="dropdown-item" (click)="add(i)" translate>New</button>
-        <button *ngIf="canRemove()" class="dropdown-item" (click)="remove(i)" translate>Remove</button>
-        <button *ngIf="true" class="dropdown-item" (click)="hide()" translate>Hide</button>
-        <a class="dropdown-item disabled" href="/cataloging/help" translate>Help</a>
-      </div>
-    </div>
-      </div>
-    <formly-field class="col-11" [field]="field"></formly-field>
-    </div>
+    <ng-container *ngFor="let field of field.fieldGroup; let i = index">
+      <div *ngIf="isChildrenObject()">
+        <div
+          *ngIf="field.templateOptions.label"
+          class="btn-group d-block"
+          dropdown
+        >
+          <button
+            id="button-basic"
+            dropdownToggle
+            type="button"
+            class="btn btn-link dropdown-toggle text-decoration-none text-reset p-0 dropdown-toggle"
+            aria-controls="dropdown-basic"
+          >
+            {{ field.templateOptions.label }}
+            <span *ngIf="field.templateOptions.required">*</span>
+            <span class="ml-2 caret"></span>
+          </button>
+          <div
+            id="dropdown-basic"
+            *dropdownMenu
+            class="dropdown-menu"
+            role="menu"
+            aria-labelledby="button-basic"
+          >
+            <button
+              *ngIf="canAdd()"
+              class="dropdown-item"
+              (click)="add(i)"
+              translate
+            >
+              New
+            </button>
+            <a class="dropdown-item disabled" href="/cataloging/help" translate
+              >Help</a
+            >
+          </div>
+        </div>
+        <p *ngIf="field.templateOptions.description">{{ to.description }}</p>
 
-  </div>
+        <div
+          class="alert alert-danger"
+          role="alert"
+          *ngIf="field.options.showError && field.formControl.errors"
+        >
+          <formly-validation-message
+            [field]="field"
+          ></formly-validation-message>
+        </div>
+      </div>
+      <div
+        class="d-flex mb-2"
+        [ngClass]="{ 'pl-4 object-block': !isChildrenObject() }"
+      >
+        <button
+          *ngIf="!isChildrenObject()"
+          (click)="add(i)"
+          class="btn btn-light bg-white mr-2"
+        >
+          <i class="fa fa-plus"></i>
+        </button>
+        <div class="flex-grow-1">
+          <formly-field [field]="field"></formly-field>
+        </div>
+        <button
+          (click)="remove(i)"
+          class="btn btn-light bg-white ml-2"
+          [ngClass]="{ 'mb-2': isChildrenObject() }"
+        >
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </ng-container>
   `,
+  styles: [
+    `
+      .object-block {
+        border-left: 2px solid #ddd;
+      }
+    `
+  ]
 })
-export class ArrayTypeComponent extends FieldArrayType implements OnInit {
-  onPopulate(field: FormlyFieldConfig) {
-    console.log('pop', field);
-    super.onPopulate(field);
-    // console.log();
-    // if (field.templateOptions.required) {
-    //   this.add(0);
-    // }
-  }
-
+export class ArrayTypeComponent extends FieldArrayType
+  implements OnInit, AfterViewInit {
   ngOnInit() {
-    console.log('init');
+    this.field.templateOptions.parent = this;
+    console.log(this);
+  }
+  ngAfterViewInit() {
+    // viewChild is set after the view has been initialized
     // if (this.field.templateOptions.required) {
-    //   super.add(0);
+    super.add(0);
     // }
   }
 
   canAdd() {
-    console.log(this.field.templateOptions.required);
+    // console.log(this.field.templateOptions.required);
     const maxItems = this.field.templateOptions.maxItems;
     if (maxItems === undefined) {
       return true;
@@ -80,11 +135,15 @@ export class ArrayTypeComponent extends FieldArrayType implements OnInit {
     this.field.fieldGroup[this.field.fieldGroup.length - 1].focus = true;
   }
 
+  isChildrenObject() {
+    // return true;
+    return this.field.fieldArray.type === "object";
+  }
+
   hide() {
     this.field.hide = true;
-    for(let i=0; i<this.formControl.length; i++) {
+    for (let i = 0; i < this.formControl.length; i++) {
       this.remove(0);
     }
   }
-
 }

@@ -36,10 +36,69 @@ export class AppComponent {
 
   type: string;
   schema: any = {
+    title: 'Test editor',
     type: 'object',
     required: ['title', 'authors'],
-    propertiesOrder: ['types', 'title', 'authors', 'street', 'address'],
+    // propertiesOrder: ['types', 'title', 'authors', 'street', 'address'],
     properties: {
+      object1: {
+        type: 'object',
+        title: 'object1',
+        properties: {
+          object2: {
+            type: 'object',
+            title: 'object2',
+            properties: {
+              value1: {type: 'string', title: 'value1'},
+              value2: {type: 'string', title: 'value2'}
+            }
+          }
+        }
+      },
+      collation: {
+        type: 'object',
+        title: 'collation',
+        properties: {
+          pages: {type: 'string', title: 'pages'},
+          dimensions: {type: 'string', title: 'dimensions'}
+        }
+      },
+      nested: {
+        type: 'object',
+        title: 'nested',
+        properties: {
+          level1: {
+            type: 'array',
+            title: 'level1',
+            items: {
+              type: 'object',
+              title: 'level11',
+              properties: {
+                level2 :{
+                  type: 'array',
+                  title: 'level2',
+                  items: {
+                    type: 'object',
+                    title: 'level21',
+                    properties: {
+                      value1: {type: 'string', title: 'value1'},
+                      value2: {type: 'string', title: 'value2'}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          rlevel1: {
+            type: 'array',
+            title: 'rlevel1',
+            items: {
+              type: 'string',
+              title: 'rvalue'
+            }
+          }
+        }
+      },
       title: {
         title: 'Title',
         type: 'string',
@@ -48,20 +107,25 @@ export class AppComponent {
           focus: true
         }
       },
-      street: {
-        title: 'Street',
-        type: 'string',
-        minLength: 3,
-        form: {
-          placeholder: 'please enter a street'
+      notes: {
+        title: 'Notes',
+        type: 'array',
+        items: {
+          type: 'string',
+          title: 'note',
+          minLength: 3,
+          form: {
+            placeholder: 'please enter a new note'
+          }
         }
       },
       address: {
-        title: 'Address',
+        title: 'Addresses',
         type: 'array',
         items: {
+          title: 'address',
           type: 'object',
-          propertiesOrder: ['city', 'street'],
+          // propertiesOrder: ['city', 'street'],
           properties: {
             'street': { title: 'street', type: 'string' },
             'city': {
@@ -121,14 +185,13 @@ export class AppComponent {
   ) {
     // console.log('prop', new Properties(this.schema).properties);
     this.schema = orderedJsonSchema(this.schema);
-    console.log(this.schema);
     // this.type = type;
     this.form = new FormGroup({});
-    this.form.valueChanges.subscribe(x => console.log(x, this.form, this.model));
+    // this.form.valueChanges.subscribe(x => console.log(x, this.form, this.model));
     this.options = {};
     this.fields = [formlyJsonschema.toFieldConfig(this.schema, {
       map: (field: FormlyFieldConfig, mapSource: JSONSchema7) => {
-        console.log(field, mapSource);
+        // console.log(field, mapSource);
         const formOptions = mapSource.form;
         if (formOptions) {
           if (formOptions.hide === true) {
@@ -154,7 +217,7 @@ export class AppComponent {
         //     };
         //   }
         // }
-
+        console.log(field, mapSource);
         return field;
       },
     })];
