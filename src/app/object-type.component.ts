@@ -48,6 +48,15 @@ export class ObjectTypeComponent extends FieldType implements OnInit {
     }
   }
 
+  hasMenu(field: FormlyFieldConfig) {
+    // console.log(field.templateOptions.label, field.type, field.fieldGroup.length, field.templateOptions.helpURL);
+    return (field.type === 'object' && this.hiddenFieldGroup(field.fieldGroup).length > 0) || field.templateOptions.helpURL;
+  }
+
+  hiddenFieldGroup(fieldGroup) {
+    return fieldGroup.filter(f => f.hide && !(f.expressionProperties && f.expressionProperties.hideExpression));
+  }
+
   /**
    * Is my parent an array?
    * @returns boolean, true if my parent is an array

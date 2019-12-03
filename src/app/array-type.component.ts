@@ -87,4 +87,13 @@ export class ArrayTypeComponent extends FieldArrayType {
       this.remove(0);
     }
   }
+
+  hasMenu(field: FormlyFieldConfig) {
+    // console.log(field.templateOptions.label, field.type, field.fieldGroup.length, field.templateOptions.helpURL);
+    return (field.type === 'object' && this.hiddenFieldGroup(field.fieldGroup).length > 0) || field.templateOptions.helpURL;
+  }
+
+  hiddenFieldGroup(fieldGroup) {
+    return fieldGroup.filter(f => f.hide && !(f.expressionProperties && f.expressionProperties.hideExpression));
+  }
 }

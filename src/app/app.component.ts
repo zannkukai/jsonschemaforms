@@ -230,7 +230,6 @@ export class AppComponent {
           }
         }
       },
-      description: 'description',
       title: {
         title: 'Title',
         description: 'un super titre',
@@ -313,6 +312,9 @@ export class AppComponent {
         maxItems: 3,
         description: 'description',
         title: 'Authors',
+        form: {
+          helpURL: 'http://access.rdatoolkit.org'
+        },
         items: {
           type: 'object',
           description: 'description',
@@ -444,6 +446,10 @@ export class AppComponent {
               field.templateOptions.options = formOptions.options;
             }
             // select labels and values
+            if (formOptions.helpURL) {
+              field.templateOptions.helpURL = formOptions.helpURL;
+            }
+            // select labels and values
             if (formOptions.expressionProperties) {
               field.expressionProperties = formOptions.expressionProperties;
             }
@@ -482,13 +488,15 @@ export class AppComponent {
           // show the field if the model contains a value
           field.hooks = {
             // not on ngInit because add-fields-editor component act on ngInit already
-            ngAfterViewInit: f => {
+            afterViewInit: f => {
               if (
                 f.hide === true &&
                 isEmpty(removeEmptyValues(f.model)) === false
               ) {
-                f.hide = false;
-                this.editorService.removeHiddenField(f);
+                setTimeout( () => {
+                  f.hide = false;
+                  this.editorService.removeHiddenField(f);
+                });
               }
             }
           };
