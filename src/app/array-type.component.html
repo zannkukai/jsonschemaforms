@@ -22,7 +22,7 @@
   <!-- put title with menu section for item object -->
   <div *ngIf="isChildrenObject()">
     <ng-container
-      *ngTemplateOutlet="hasMenu(f) ? menu : title; context: { f: f, i: i }"
+      *ngTemplateOutlet="hasMenu(f) ? menu : title; context: {f: f, i: i}"
     >
     </ng-container>
 
@@ -39,7 +39,7 @@
   <!-- all kind of item -->
   <div
     class="d-flex mb-2"
-    [ngClass]="{ 'pl-4 object-block': isChildrenObject() }"
+    [ngClass]="{ 'pl-2 border-left': isChildrenObject() }"
   >
     <!-- add button -->
     <ng-container

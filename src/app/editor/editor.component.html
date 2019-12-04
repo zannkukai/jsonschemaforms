@@ -1,0 +1,49 @@
+<div *ngIf="fields" class="row">
+  <!-- add fields section -->
+  <div class="col-md-3 col-xl-2 bd-sidebar">
+    <app-add-field-editor
+      class="bd-search d-flex align-items-center"
+      [fields]="fields"
+    ></app-add-field-editor>
+  </div>
+
+  <!-- TOC navigation -->
+  <nav
+    class="d-none d-xl-block col-xl-2 bd-toc"
+    aria-label="Secondary navigation"
+  >
+    <ul class="section-nav">
+      <li *ngFor="let f of tocFields" class="toc-entry toc-h2">
+        <a href (click)="scrollTo($event, f)">{{ f.templateOptions.label }}</a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- editor itself -->
+  <div class="col-md-9 col-xl-8" role="main">
+    <form
+      class="col"
+      [formGroup]="form"
+      (ngSubmit)="submit($event)"
+      *ngIf="fields"
+    >
+      <!-- ngx-formly -->
+      <formly-form
+        [model]="model"
+        [fields]="fields"
+        [options]="options"
+        [form]="form"
+        (modelChange)="modelChange($event)"
+      ></formly-form>
+
+      <!-- submit button -->
+      <button
+        type="submit"
+        class="btn btn-primary submit-button"
+        [disabled]="!form.valid"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</div>

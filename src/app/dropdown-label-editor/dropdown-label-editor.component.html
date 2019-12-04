@@ -1,13 +1,14 @@
-<div *ngIf="field.templateOptions.label" class="btn-group d-block" dropdown>
+<div *ngIf="field.templateOptions.label" class="d-block">
   <!-- add button -->
   <a
     *ngIf="canAdd"
     (click)="addClick($event)"
-    class="btn btn-outline-secondary mr-1 btn-sm"
+    class="btn btn-link btn-sm mr-1"
   >
-    <i class="btn btn-link btn-sm"></i>
-</a>
+    <i class="fa fa-plus"></i>
+  </a>
   <!-- dropdown button with legend -->
+  <div class="btn-group" dropdown>
   <button
     [id]="field.id"
     dropdownToggle
@@ -30,5 +31,6 @@
     aria-labelledby="button-basic"
   >
     <ng-content></ng-content>
+  </div>
   </div>
 </div>

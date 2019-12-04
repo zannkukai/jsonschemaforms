@@ -8,9 +8,8 @@ describe('AddFieldEditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddFieldEditorComponent ]
-    })
-    .compileComponents();
+      declarations: [AddFieldEditorComponent]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
