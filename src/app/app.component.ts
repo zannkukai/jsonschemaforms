@@ -1,108 +1,11 @@
-import {
-  Component,
-  ɵSWITCH_COMPILE_INJECTABLE__POST_R3__
-} from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { FormlyJsonschema } from '@ngx-formly/core/json-schema';
-import { JSONSchema7 } from 'json-schema';
-import { EditorService } from './editor.service';
-
-/**
- * Fix order in JSONSchema
- * This re-order the object properties given a local defined
- * `propertiesOrder` property.
- * @param schema - object, the JSONSchema
- * @returns object, a fresh copy of the ordred JSONSchema
- */
-function orderedJsonSchema(schema) {
-  if (schema.properties) {
-    if (schema.propertiesOrder) {
-      // copy the data
-      schema._properties = { ...schema.properties };
-      // new ordered properties
-      schema.properties = {};
-      // copy in the right order
-      for (const property of schema.propertiesOrder) {
-        schema.properties[property] = schema._properties[property];
-      }
-    }
-    // recursion for objects
-    for (const property of Object.keys(schema.properties)) {
-      orderedJsonSchema(schema.properties[property]);
-    }
-  }
-  // recursion for array
-  if (schema.items) {
-    orderedJsonSchema(schema.items);
-  }
-  return schema;
-}
-
-/**
- * Tell if a value can be considered as empty
- * @param value - any, the value to check
- * @returns boolean, true if the value is empty
- */
-function isEmpty(value) {
-  return (
-    // null or undefined
-    value == null ||
-    // has length and it's zero (array, string)
-    (value.hasOwnProperty('length') && value.length === 0) ||
-    // is an Object and has no keys
-    (value instanceof Object && Object.keys(value).length === 0)
-  );
-}
-
-/**
- * Recursively remove the empty values
- * @param data - object, the data to be cleaned
- * @returns object, a fresh copy of the clean data
- */
-function removeEmptyValues(data) {
-  // array?
-  if (data instanceof Array) {
-    // new array with non empty values
-    const newArray = [];
-    for (const d of data) {
-      // recursion
-      const value = removeEmptyValues(d);
-      if (!isEmpty(value)) {
-        newArray.push(value);
-      }
-    }
-    return newArray;
-  }
-  // object?
-  if (data instanceof Object) {
-    // new object with non empty values
-    const newObject = {};
-    for (const key of Object.keys(data)) {
-      const value = removeEmptyValues(data[key]);
-      if (!isEmpty(value)) {
-        newObject[key] = value;
-      }
-    }
-    return newObject;
-  }
-  return data;
-}
+import { Component, OnInit } from '@angular/core';
+import { removeEmptyValues } from './utils';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html'
 })
-export class AppComponent {
-  // angular formGroop root
-  form: FormGroup;
-  // initial data
-  model: any;
-  // additionnal form options
-  options: FormlyFormOptions;
-  // form configuration
-  fields: FormlyFieldConfig[];
-  // JSONSchema
+export class AppComponent implements OnInit {
   schema: any = {
     title: 'Test editor',
     description: 'description',
@@ -141,7 +44,12 @@ export class AppComponent {
       object1: {
         type: 'object',
         title: 'object1',
-        form: { hide: true },
+        form: {
+          hide: true,
+          navigation: {
+            essential: true
+          }
+        },
         description: 'description',
         properties: {
           object2: {
@@ -272,7 +180,12 @@ export class AppComponent {
         title: 'Addresses',
         type: 'array',
         minItems: 1,
-        form: { hide: true },
+        form: {
+          hide: true,
+          navigation: {
+            essential: true
+          }
+        },
         items: {
           description: 'description',
           title: 'address',
@@ -374,7 +287,7 @@ export class AppComponent {
               minLength: 6,
               form: {
                 hideExpression:
-                '!model.roles.some(r => r === "librarian" || r === "system librarian")',
+                  '!model.roles.some(r => r === "librarian" || r === "system librarian")',
                 expressionProperties: {
                   'templateOptions.required':
                     'model.roles.some(r => r === "librarian" || r === "system librarian")'
@@ -387,7 +300,7 @@ export class AppComponent {
               minLength: 6,
               form: {
                 hideExpression:
-                '!model.roles.some(r => r === "librarian" || r === "system librarian")',
+                  '!model.roles.some(r => r === "librarian" || r === "system librarian")',
                 expressionProperties: {
                   'templateOptions.required':
                     'model.roles.some(r => r === "system librarian")'
@@ -419,109 +332,20 @@ export class AppComponent {
     }
   };
 
+  // initial data
+  model = {
+    $schema: 'https://ils.rero.ch/schemas/documents.json',
+    notes: ['note1', 'note2']
+  };
+
+  // ouput data
+  outputModel = {};
+
   /**
-   * Constructor
-   * @param formlyJsonschema - FormlyJsonschema, the ngx-fomly jsonschema service
+   * Component initialisation
    */
-  constructor(
-    private formlyJsonschema: FormlyJsonschema,
-    private editorService: EditorService) {
-
-    this.schema = orderedJsonSchema(this.schema);
-    this.form = new FormGroup({});
-    this.options = {};
-
-    // form configuration
-    this.fields = [
-      formlyJsonschema.toFieldConfig(this.schema, {
-        // post process JSONSChema7 to FormlyFieldConfig conversion
-        map: (field: FormlyFieldConfig, mapSource: JSONSchema7) => {
-          // additionnal JSONSchema configurations
-          const formOptions = mapSource.form;
-          if (formOptions) {
-            // hide a field at startup
-            if (formOptions.hide === true) {
-              field.hide = true;
-            }
-            // put the focus in this field
-            if (formOptions.focus === true) {
-              field.focus = true;
-            }
-            // input placeholder
-            if (formOptions.placeholder) {
-              field.templateOptions.placeholder = formOptions.placeholder;
-            }
-            // select labels and values
-            if (formOptions.options) {
-              field.templateOptions.options = formOptions.options;
-            }
-            // select labels and values
-            if (formOptions.helpURL) {
-              field.templateOptions.helpURL = formOptions.helpURL;
-            }
-            // select labels and values
-            if (formOptions.expressionProperties) {
-              field.expressionProperties = formOptions.expressionProperties;
-            }
-            // select labels and values
-            if (formOptions.hideExpression) {
-              field.hideExpression = formOptions.hideExpression;
-            }
-            // custom validation messages
-            if (formOptions.validation) {
-              const messages = formOptions.validation.messages;
-              if (!field.validation) {
-                field.validation = {};
-              }
-              if (!field.validation.messages) {
-                field.validation.messages = {};
-              }
-              for (const key of Object.keys(messages)) {
-                field.validation.messages[key] = (
-                  error,
-                  f: FormlyFieldConfig
-                ) => `${messages[key]}`;
-              }
-            }
-          }
-
-          // render input fields inline
-          if (mapSource.type === 'string') {
-            field.wrappers = ['form-field-horizontal'];
-          }
-
-          // initial population of arrays with a minItems constraints
-          if (mapSource.minItems && !mapSource.hasOwnProperty('default')) {
-            field.defaultValue = new Array(mapSource.minItems);
-          }
-
-          // show the field if the model contains a value
-          field.hooks = {
-            // not on ngInit because add-fields-editor component act on ngInit already
-            afterViewInit: f => {
-              if (
-                f.hide === true &&
-                isEmpty(removeEmptyValues(f.model)) === false
-              ) {
-                // to avoid: Expression has changed after it was checked
-                // See: https://blog.angular-university.io/angular-debugging
-                setTimeout( () => {
-                  f.hide = false;
-                  this.editorService.removeHiddenField(f);
-                });
-              }
-            }
-          };
-          return field;
-        }
-      })
-    ];
-
-    // initial data
-    this.model = {
-      $schema: 'https://ils.rero.ch/schemas/documents.json',
-      notes: ['note1', 'note2']
-    };
+  ngOnInit() {
+    this.outputModel = {...this.model};
   }
 
   /**
@@ -534,11 +358,11 @@ export class AppComponent {
   }
 
   /**
-   * Simulate the form submission
-   * Actually, print the result on the console
-   * @param model - object, JSON to POST on the backend
+   * Called when the model has been change in the editor.
+   * @param model - object, the new model
    */
-  submit(model) {
-    console.log(removeEmptyValues(model));
+  modelChanged(model) {
+    // copy
+    this.outputModel = {...model};
   }
 }

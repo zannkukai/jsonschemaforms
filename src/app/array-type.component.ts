@@ -3,14 +3,7 @@ import { FieldArrayType, FormlyFieldConfig } from '@ngx-formly/core';
 
 @Component({
   selector: 'app-formly-array-type',
-  templateUrl: 'array-type.component.html',
-  styles: [
-    `
-      .object-block {
-        border-left: 2px solid #ddd;
-      }
-    `
-  ]
+  templateUrl: 'array-type.component.html'
 })
 export class ArrayTypeComponent extends FieldArrayType {
   /**

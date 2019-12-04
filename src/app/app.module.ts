@@ -17,6 +17,7 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { DropdownLabelEditorComponent } from './dropdown-label-editor/dropdown-label-editor.component';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import { AddFieldEditorComponent } from './add-field-editor/add-field-editor.component';
+import { EditorComponent } from './editor/editor.component';
 
 export function minItemsValidationMessage(err, field: FormlyFieldConfig) {
   return `should NOT have fewer than ${field.templateOptions.minItems} items`;
@@ -71,7 +72,8 @@ export function constValidationMessage(err, field: FormlyFieldConfig) {
     ArrayTypeComponent,
     HorizontalComponent,
     DropdownLabelEditorComponent,
-    AddFieldEditorComponent
+    AddFieldEditorComponent,
+    EditorComponent
   ],
   imports: [
     BrowserModule,

@@ -3,49 +3,22 @@
   <a class="navbar-brand" href="#">Common header</a>
 </nav>
 
-<!-- stick top nav bar-->
-<nav class="navbar sticky-top navbar-light bg-light justify-content-between">
-  <div class="container">
-    <a class="navbar-brand">Add fields</a>
-    <form class="form-inline">
-      <app-add-field-editor [fields]="fields"></app-add-field-editor>
-    </form>
-  </div>
-</nav>
-
 <div class="container">
-  <div class="row">
-    <!-- editor itself -->
-    <form
-      class="col"
-      [formGroup]="form"
-      (ngSubmit)="submit($event)"
-      *ngIf="fields"
-    >
-      <formly-form
-        [model]="model"
-        [fields]="fields"
-        [options]="options"
-        [form]="form"
-      ></formly-form>
-      <!-- submit button -->
-      <button
-        type="submit"
-        class="btn btn-primary submit-button"
-        [disabled]="!form.valid"
-      >
-        Submit
-      </button>
-    </form>
-  </div>
+
+  <!-- editor -->
+  <app-editor [model]="model" [schema]="schema" (modelChanged)="modelChanged($event)"></app-editor>
+
   <!-- output json -->
-  <div class="card mt-4">
-    <div class="card-header">
-      Model
-    </div>
-    <div class="card-body">
-      <h5 class="card-title">JSON</h5>
-      <pre class="card-text">{{ clean(model) | json }}</pre>
+  <div *ngIf="ouputModel" class="row">
+    <div class="card mt-4">
+      <div class="card-header">
+        Model
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">JSON</h5>
+        <pre class="card-text">{{ clean(outputModel) | json }}</pre>
+      </div>
     </div>
   </div>
+
 </div>

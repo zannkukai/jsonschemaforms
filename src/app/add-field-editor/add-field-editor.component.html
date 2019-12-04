@@ -1,12 +1,29 @@
 <!-- from ngx-boostrap -->
-<input
-  id="#add-field"
-  [(ngModel)]="value"
-  [typeahead]="typeheadFields"
-  typeaheadOptionField="name"
-  (typeaheadOnSelect)="showSelectedField($event)"
-  placeholder="Press space to see all"
-  class="form-control mr-sm-2"
-  typeaheadMinLength="0"
-  [disabled]="typeheadFields.length === 0"
-/>
+<div class="w-100">
+  <div class="form-group">
+    <label for="addField" translate>Add field</label>
+    <input
+      id="#addField"
+      [(ngModel)]="value"
+      [typeahead]="typeheadFields"
+      typeaheadOptionField="name"
+      (typeaheadOnSelect)="itemSelected($event)"
+      class="form-control"
+      typeaheadMinLength="0"
+      [disabled]="typeheadFields.length === 0"
+    />
+    <small id="addFieldHelp" class="form-text text-muted"
+      >Press space for all.</small
+    >
+  </div>
+  <ul class="list-unstyled">
+    <li *ngFor="let field of getEssentials()">
+      <button
+        (click)="showSelectedField(field.field)"
+        class="btn btn-outline-secondary w-100 mb-1 btn-sm"
+      >
+        {{ field.field.templateOptions.label }}
+      </button>
+    </li>
+  </ul>
+</div>

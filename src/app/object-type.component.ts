@@ -4,14 +4,7 @@ import { EditorService } from './editor.service';
 
 @Component({
   selector: 'app-formly-object-type',
-  templateUrl: './object-type.component.html',
-  styles: [
-    `
-      .object-block {
-        border-left: 2px solid #ddd;
-      }
-    `
-  ]
+  templateUrl: './object-type.component.html'
 })
 export class ObjectTypeComponent extends FieldType implements OnInit {
   // default value
